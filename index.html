@@ -1,0 +1,697 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Typographic Experiments</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.9.3/p5.min.js"></script>
+    <script src="canvas-manager.js"></script>
+    <script type="module" src="app.js"></script>
+  </head>
+  <body>
+    <div id="app">
+
+      <!-- Floating Toolbar -->
+      <div class="floating-toolbar">
+        <div class="toolbar-section">
+          <button id="zoomInBtn" class="toolbar-btn" aria-label="Zoom In">
+            <img src="icons/icon-actions/Plus.svg" alt="Zoom In" />
+          </button>
+          <button id="zoomOutBtn" class="toolbar-btn" aria-label="Zoom Out">
+            <img src="icons/icon-actions/Minus.svg" alt="Zoom Out" />
+          </button>
+          <button id="zoomResetBtn" class="toolbar-btn" aria-label="Reset Zoom">
+            <img src="icons/icon-arrows/Reset.svg" alt="Reset Zoom" />
+          </button>
+          <div class="zoom-level-display" id="zoomLevel">100%</div>
+        </div>
+        
+              <div class="toolbar-section">
+                <div class="effect-switch" id="effectSwitch" aria-label="Toggle Effect Type">
+                  <div class="switch-option active" data-mode="text">
+                    <img src="icons/icon-design/Text.svg" alt="Text Effects" />
+                  </div>
+                  <div class="switch-option" data-mode="image">
+                    <img src="icons/icon-media/Image.svg" alt="Image Effects" />
+                  </div>
+                  <div class="switch-indicator"></div>
+                </div>
+              </div>
+              
+              <div class="toolbar-section">
+                <button id="addCanvasBtn" class="toolbar-btn" aria-label="Add Canvas">
+                  <img src="icons/icon-design/Frame.svg" alt="Add Canvas" />
+                  <span>Add Canvas</span>
+                </button>
+              </div>
+      </div>
+
+      <main class="layout">
+        <aside id="controls" class="controls">
+          <div class="controls-header">
+            <div class="title">Settings</div>
+            <button id="controlsToggle" class="controls-toggle" aria-label="Collapse settings"></button>
+          </div>
+
+          <div class="controls-content">
+            <!-- Tab System -->
+            <div class="tab-system">
+              <div class="tab-buttons">
+                <button id="textTab" class="tab-btn active" data-tab="text">Text</button>
+                <button id="imageTab" class="tab-btn" data-tab="image">Images</button>
+              </div>
+              
+              <!-- Text Tab Content -->
+              <div id="textTabContent" class="tab-content active">
+                <div class="control-group">
+                  <div class="group-title">Text Experiment</div>
+                  <div class="control-row">
+                    <label>Type</label>
+                    <div id="experimentSelectHost" class="custom-select-host"></div>
+                  </div>
+                  <div id="experimentControls"></div>
+                </div>
+                
+                <div class="control-group">
+                  <div class="group-title">Text Color</div>
+                  <div class="control-row">
+                    <label for="typeColor">Type</label>
+                    <div class="color-row">
+                      <input id="typeColor" class="color-swatch" type="color" value="#111111" />
+                      <input id="typeColorHex" class="hex-input" type="text" placeholder="#111111" />
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Image Tab Content -->
+              <div id="imageTabContent" class="tab-content">
+                <div class="control-group">
+                  <div class="group-title">Image Effect</div>
+                  <div class="control-row">
+                    <label>Type</label>
+                    <div id="imageEffectSelectHost" class="custom-select-host"></div>
+                  </div>
+                  <div id="imageEffectControls"></div>
+                </div>
+                
+                <div class="control-group">
+                  <div class="group-title">Image Color</div>
+                  <div class="control-row">
+                    <label for="imageColor">Image</label>
+                    <div class="color-row">
+                      <input id="imageColor" class="color-swatch" type="color" value="#111111" />
+                      <input id="imageColorHex" class="hex-input" type="text" placeholder="#111111" />
+                    </div>
+                  </div>
+                </div>
+                
+                <div class="control-group">
+                  <div class="group-title">Image Upload</div>
+                  <div class="control-row">
+                    <label>Upload images</label>
+                    <div class="file-row">
+                      <input id="imageUploadInput" class="file-input" type="file" accept="image/*" multiple />
+                      <button id="imageUploadBtn" type="button" class="btn file-btn">Choose images</button>
+                      <span id="imageUploadCount" class="file-name" aria-live="polite">No images</span>
+                    </div>
+                  </div>
+
+                  <div id="imageControls" style="display: none;">
+                    <div class="control-row">
+                      <label>Layer</label>
+                      <div id="imageLayeringSelectHost" class="custom-select-host"></div>
+                    </div>
+
+                    <div class="control-row">
+                      <label for="imageOpacitySlider">Opacity</label>
+                      <input id="imageOpacitySlider" type="range" min="0" max="1" step="0.05" value="1" />
+                      <span id="imageOpacityValue">100%</span>
+                    </div>
+
+                    <div id="imageList" class="image-list"></div>
+                  </div>
+                </div>
+              </div>
+
+            </div>
+
+            <div class="control-group">
+              <div class="group-title">Global</div>
+              <div class="control-row">
+                <label for="textInput">Text</label>
+                <textarea id="textInput" placeholder="Type something…" rows="4"></textarea>
+              </div>
+
+              <div class="control-row">
+                <label for="bgColor">Background</label>
+                <div class="color-row">
+                  <input id="bgColor" class="color-swatch" type="color" value="#ffffff" />
+                  <input id="bgColorHex" class="hex-input" type="text" placeholder="#FFFFFF" />
+                </div>
+              </div>
+
+
+              <div class="control-row">
+                <label>Format</label>
+                <div id="formatSelectHost" class="custom-select-host"></div>
+              </div>
+
+              <div class="control-row">
+                <label>Image type</label>
+                <div id="imageTypeSelectHost" class="custom-select-host"></div>
+              </div>
+
+              <div class="control-row">
+                <label>Video type</label>
+                <div id="videoTypeSelectHost" class="custom-select-host"></div>
+              </div>
+
+              <div class="control-row">
+                <label>Upload font</label>
+                <div class="file-row">
+                  <input id="fontUploadInput" class="file-input" type="file" accept=".ttf,.otf" />
+                  <button id="fontUploadBtn" type="button" class="btn file-btn">Choose file</button>
+                  <span id="fontFileName" class="file-name" aria-live="polite">No file chosen</span>
+                </div>
+              </div>
+
+            </div>
+          </div>
+        </aside>
+
+        <section id="canvas-container" class="canvas-container">
+          <div id="canvas-workspace" class="canvas-workspace">
+            <div id="canvasHud" class="canvas-hud">
+              <div id="hudRow" class="hud-row"></div>
+            </div>
+            <!-- Individual canvas artboards will be added here dynamically -->
+          </div>
+        </section>
+      </main>
+
+      <!-- Floating Layers Sidebar -->
+      <div id="layersSidebar" class="floating-layers-sidebar">
+        <div class="layers-header">
+          <div class="layers-title">
+            <img src="icons/icon-design/Layers.svg" alt="Layers" />
+            <span>Layers</span>
+          </div>
+          <button id="layersToggle" class="layers-toggle" aria-label="Toggle layers sidebar">
+            <img src="icons/icon-arrows/ChevronLeft.svg" alt="Toggle" />
+          </button>
+        </div>
+        
+        <div class="layers-content">
+          <div class="layers-list" id="layersList">
+            <!-- Canvas layers will be added here dynamically -->
+          </div>
+        </div>
+      </div>
+
+      <!-- Vertical Toolbar -->
+      <div id="verticalToolbar" class="vertical-toolbar">
+              <div class="toolbar-item" data-tool="image-type">
+                <img src="icons/icon-media/Image.svg" alt="Image Type" />
+                <div class="dropdown-menu">
+                  <div class="dropdown-item active" data-format="png">
+                    <span>PNG</span>
+                    <small>Lossless</small>
+                  </div>
+                  <div class="dropdown-item" data-format="jpg">
+                    <span>JPG</span>
+                    <small>Compressed</small>
+                  </div>
+                  <div class="dropdown-item" data-format="webp">
+                    <span>WebP</span>
+                    <small>Modern</small>
+                  </div>
+                </div>
+              </div>
+        
+        <div class="toolbar-item" data-tool="video-type">
+          <img src="icons/icon-media/Video.svg" alt="Video Type" />
+          <div class="dropdown-menu">
+            <div class="dropdown-item active" data-format="mp4">
+              <span>MP4</span>
+              <small>Universal</small>
+            </div>
+            <div class="dropdown-item" data-format="webm">
+              <span>WebM</span>
+              <small>Web Optimized</small>
+            </div>
+          </div>
+        </div>
+        
+        
+        <div class="toolbar-separator"></div>
+        
+        <div class="toolbar-item" data-tool="capture">
+          <img src="icons/icon-media/Camera.svg?v=2" alt="Capture Image" />
+          <div class="dropdown-menu">
+            <div class="dropdown-item">
+              <span>Capture Image</span>
+              <small>Save as PNG</small>
+            </div>
+          </div>
+        </div>
+        
+        <div class="toolbar-item" data-tool="record">
+          <img src="icons/icon-shapes/Circle.svg" alt="Start Recording" />
+          <div class="dropdown-menu">
+            <div class="dropdown-item">
+              <span>Recording</span>
+              <small>Save as MP4</small>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Settings Toolbar - Bottom Right -->
+    <div id="settingsToolbar" class="settings-toolbar">
+      <!-- Text Settings -->
+      <div class="toolbar-item text-settings-only" data-tool="text-settings">
+        <img src="icons/icon-design/Text.svg" alt="Text Settings" />
+      </div>
+      
+      <!-- Text Effects -->
+      <div class="toolbar-item text-settings-only" data-tool="text-effects">
+        <img src="icons/icon-design/MagicWand.svg" alt="Text Effects" />
+      </div>
+      
+      <!-- Image Settings -->
+      <div class="toolbar-item image-settings-only" data-tool="image-settings">
+        <img src="icons/icon-design/Frame.svg" alt="Image Settings" />
+      </div>
+      
+      <!-- Dynamic Effect Settings - Shows settings for current effect -->
+      <div class="toolbar-item" data-tool="effect-settings">
+        <img src="icons/icon-actions/Settings.svg" alt="Effect Settings" />
+      </div>
+    </div>
+
+    <!-- Settings Panel -->
+    <div id="textSettingsPanel" class="settings-panel">
+      <div class="panel-header">
+        <div class="panel-title" id="settingsPanelTitle">
+          <img id="settingsPanelIcon" src="icons/icon-design/Text.svg" alt="Settings" />
+          <span id="settingsPanelText">Settings</span>
+        </div>
+        <button class="panel-close" aria-label="Close panel">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg>
+        </button>
+      </div>
+      
+      <div id="textPanelContent">
+        <!-- Text Settings Content -->
+        <div id="textSettingsContent" class="panel-content-section">
+          <!-- Text Input Section -->
+          <div class="control-section">
+            <div class="section-header">
+              <span class="section-title">Text</span>
+            </div>
+            <div class="content-group">
+              <div class="control-with-icon">
+                <div class="icon-label">
+                  <img src="icons/icon-design/Text.svg" alt="Text" />
+                </div>
+                <div class="text-input-container">
+                  <textarea id="panelTextInput" placeholder="Type something..." rows="4" class="text-input"></textarea>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Typography Section -->
+          <div class="control-section">
+            <div class="section-header">
+              <span class="section-title">Typography</span>
+            </div>
+            <div class="typography-group">
+              <!-- Inline Size and Weight Controls -->
+              <div class="inline-controls">
+                <!-- Size Control -->
+                <div class="control-with-icon">
+                  <div class="icon-label">
+                    <img src="icons/icon-content/IncreaseText.svg" alt="Size" />
+                  </div>
+                  <div class="hybrid-input">
+                    <input type="text" id="panelFontSize" value="48" placeholder="48" />
+                    <div class="dropdown-arrow" id="fontSizeDropdown">
+                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="6,9 12,15 18,9"></polyline>
+                      </svg>
+                    </div>
+                    <div class="dropdown-menu" id="fontSizeOptions">
+                      <div class="dropdown-item" data-value="12">12px</div>
+                      <div class="dropdown-item" data-value="14">14px</div>
+                      <div class="dropdown-item" data-value="16">16px</div>
+                      <div class="dropdown-item" data-value="18">18px</div>
+                      <div class="dropdown-item" data-value="24">24px</div>
+                      <div class="dropdown-item" data-value="32">32px</div>
+                      <div class="dropdown-item" data-value="48">48px</div>
+                      <div class="dropdown-item" data-value="64">64px</div>
+                      <div class="dropdown-item" data-value="72">72px</div>
+                      <div class="dropdown-item" data-value="96">96px</div>
+                    </div>
+                  </div>
+                </div>
+                
+                <!-- Weight Control -->
+                <div class="control-with-icon">
+                  <div class="icon-label">
+                    <img src="icons/icon-design/Text.svg" alt="Weight" />
+                  </div>
+                  <div class="hybrid-input">
+                    <input type="text" id="panelFontWeight" value="400" placeholder="400" />
+                    <div class="dropdown-arrow" id="fontWeightDropdown">
+                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="6,9 12,15 18,9"></polyline>
+                      </svg>
+                    </div>
+                    <div class="dropdown-menu" id="fontWeightOptions">
+                      <div class="dropdown-item" data-value="100">Thin (100)</div>
+                      <div class="dropdown-item" data-value="200">Extra Light (200)</div>
+                      <div class="dropdown-item" data-value="300">Light (300)</div>
+                      <div class="dropdown-item" data-value="400">Normal (400)</div>
+                      <div class="dropdown-item" data-value="500">Medium (500)</div>
+                      <div class="dropdown-item" data-value="600">Semi Bold (600)</div>
+                      <div class="dropdown-item" data-value="700">Bold (700)</div>
+                      <div class="dropdown-item" data-value="800">Extra Bold (800)</div>
+                      <div class="dropdown-item" data-value="900">Black (900)</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              
+              <!-- Line Height Control - Own Row -->
+              <div class="line-height-control-row">
+                <div class="control-with-icon">
+                  <div class="icon-label">
+                    <img src="icons/icon-content/LineSpacing.svg" alt="Line Height" />
+                  </div>
+                  <div class="hybrid-input">
+                    <input type="number" id="panelLineHeight" value="1.2" placeholder="1.2" step="0.1" min="0.5" max="5.0" />
+                  </div>
+                </div>
+              </div>
+              
+              <!-- Color Control - Own Row -->
+              <div class="color-control-row">
+                <div class="control-with-icon">
+                  <div class="icon-label">
+                    <img src="icons/icon-design/Palette.svg" alt="Color" />
+                  </div>
+                  <div class="color-input-wrapper">
+                    <input type="color" id="panelTypeColor" value="#111111" class="color-input" />
+                    <div class="color-display">
+                      <span class="color-hex">#111111</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              
+              <!-- Alignment Controls - 3x3 Grid -->
+              <div class="alignment-grid">
+                <div class="alignment-row">
+                  <button class="icon-btn alignment-btn" data-position="top-left" title="Top Left">
+                    <img src="icons/icon-design/AlignTop.svg" alt="Top Left" />
+                  </button>
+                  <button class="icon-btn alignment-btn" data-position="top-center" title="Top Center">
+                    <img src="icons/icon-design/AlignTop.svg" alt="Top Center" />
+                  </button>
+                  <button class="icon-btn alignment-btn" data-position="top-right" title="Top Right">
+                    <img src="icons/icon-design/AlignTop.svg" alt="Top Right" />
+                  </button>
+                </div>
+                <div class="alignment-row">
+                  <button class="icon-btn alignment-btn" data-position="center-left" title="Center Left">
+                    <img src="icons/icon-design/AlignLeft.svg" alt="Center Left" />
+                  </button>
+                  <button class="icon-btn alignment-btn" data-position="center-center" title="Center Center">
+                    <img src="icons/icon-design/AlignCenterHorizontal.svg" alt="Center Center" />
+                  </button>
+                  <button class="icon-btn alignment-btn" data-position="center-right" title="Center Right">
+                    <img src="icons/icon-design/AlignRight.svg" alt="Center Right" />
+                  </button>
+                </div>
+                <div class="alignment-row">
+                  <button class="icon-btn alignment-btn" data-position="bottom-left" title="Bottom Left">
+                    <img src="icons/icon-design/AlignBottom.svg" alt="Bottom Left" />
+                  </button>
+                  <button class="icon-btn alignment-btn" data-position="bottom-center" title="Bottom Center">
+                    <img src="icons/icon-design/AlignBottom.svg" alt="Bottom Center" />
+                  </button>
+                  <button class="icon-btn alignment-btn" data-position="bottom-right" title="Bottom Right">
+                    <img src="icons/icon-design/AlignBottom.svg" alt="Bottom Right" />
+                  </button>
+                </div>
+              </div>
+              
+              <!-- Padding Controls - Clean Link Toggle Design -->
+              <div class="padding-controls-group">
+                <!-- Top and Bottom Padding - Inline -->
+                <div class="padding-row-inline">
+                  <!-- Top Padding -->
+                  <div class="control-with-icon">
+                    <div class="icon-label">
+                      <img src="icons/icon-design/AlignTop.svg" alt="Top Padding" />
+                    </div>
+                    <div class="hybrid-input">
+                      <input type="number" id="panelPaddingTop" min="0" value="20" placeholder="20" />
+                    </div>
+                  </div>
+                  
+                  <!-- Link Toggle Between Top and Bottom -->
+                  <button class="link-toggle-icon" id="linkTopBottom" data-linked="false" title="Link Top and Bottom">
+                    <img src="icons/icon-actions/Chain.svg" alt="Link" class="link-icon" />
+                    <img src="icons/icon-actions/Dettach.svg" alt="Unlink" class="unlink-icon" />
+                  </button>
+                  
+                  <!-- Bottom Padding -->
+                  <div class="control-with-icon">
+                    <div class="icon-label">
+                      <img src="icons/icon-design/AlignBottom.svg" alt="Bottom Padding" />
+                    </div>
+                    <div class="hybrid-input">
+                      <input type="number" id="panelPaddingBottom" min="0" value="20" placeholder="20" />
+                    </div>
+                  </div>
+                </div>
+                
+                <!-- Left and Right Padding - Inline -->
+                <div class="padding-row-inline">
+                  <!-- Left Padding -->
+                  <div class="control-with-icon">
+                    <div class="icon-label">
+                      <img src="icons/icon-design/AlignLeft.svg" alt="Left Padding" />
+                    </div>
+                    <div class="hybrid-input">
+                      <input type="number" id="panelPaddingLeft" min="0" value="20" placeholder="20" />
+                    </div>
+                  </div>
+                  
+                  <!-- Link Toggle Between Left and Right -->
+                  <button class="link-toggle-icon" id="linkLeftRight" data-linked="false" title="Link Left and Right">
+                    <img src="icons/icon-actions/Chain.svg" alt="Link" class="link-icon" />
+                    <img src="icons/icon-actions/Dettach.svg" alt="Unlink" class="unlink-icon" />
+                  </button>
+                  
+                  <!-- Right Padding -->
+                  <div class="control-with-icon">
+                    <div class="icon-label">
+                      <img src="icons/icon-design/AlignRight.svg" alt="Right Padding" />
+                    </div>
+                    <div class="hybrid-input">
+                      <input type="number" id="panelPaddingRight" min="0" value="20" placeholder="20" />
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Font Upload Section -->
+          <div class="control-section">
+            <div class="section-header">
+              <span class="section-title">Font</span>
+            </div>
+            <div class="font-upload-group">
+              <div class="control-with-icon">
+                <div class="icon-label">
+                  <img src="icons/icon-actions/CloudUpload.svg" alt="Upload" />
+                </div>
+                <div class="font-upload-container">
+                  <input type="file" id="panelFontUpload" accept=".ttf,.otf,.woff,.woff2" class="font-upload-input" />
+                  <label for="panelFontUpload" class="font-upload-label">
+                    <span class="upload-text">Upload Font</span>
+                    <span class="upload-hint">TTF, OTF, WOFF</span>
+                  </label>
+                  <div id="panelFontFileName" class="font-file-name" style="display: none;">
+                    <span class="font-file-text"></span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Text Effects Content -->
+        <div id="textEffectsContent" class="panel-content-section" style="display: none;">
+          <div class="control-section">
+            <div class="section-header">
+              <span class="section-title">Text Effects</span>
+            </div>
+            <div class="effects-list">
+              <div class="effect-option" data-effect="wavyText">
+                <div class="effect-info">
+                  <div class="effect-name">Wavy Text</div>
+                  <div class="effect-description">Smooth wave animation</div>
+                </div>
+              </div>
+
+              <div class="effect-option" data-effect="radialRings">
+                <div class="effect-info">
+                  <div class="effect-name">Radial Rings</div>
+                  <div class="effect-description">Circular text layout</div>
+                </div>
+              </div>
+
+              <div class="effect-option" data-effect="halftone">
+                <div class="effect-info">
+                  <div class="effect-name">Halftone</div>
+                  <div class="effect-description">Dot-based text rendering</div>
+                </div>
+              </div>
+
+              <div class="effect-option" data-effect="particleFlow">
+                <div class="effect-info">
+                  <div class="effect-name">Particle Flow</div>
+                  <div class="effect-description">Interactive particle system</div>
+                </div>
+              </div>
+
+              <div class="effect-option" data-effect="pathTextPhysics">
+                <div class="effect-info">
+                  <div class="effect-name">Path Text Physics</div>
+                  <div class="effect-description">Physics-based text along paths</div>
+                </div>
+              </div>
+
+              <div class="effect-option" data-effect="blurGrain">
+                <div class="effect-info">
+                  <div class="effect-name">Blur & Grain</div>
+                  <div class="effect-description">Liquid ink bleed effects</div>
+                </div>
+              </div>
+
+              <div class="effect-option" data-effect="contours">
+                <div class="effect-info">
+                  <div class="effect-name">Contour Lines</div>
+                  <div class="effect-description">Topographic text visualization</div>
+                </div>
+              </div>
+
+              <div class="effect-option" data-effect="moire">
+                <div class="effect-info">
+                  <div class="effect-name">Moire Type</div>
+                  <div class="effect-description">Interference pattern effects</div>
+                </div>
+              </div>
+
+              <div class="effect-option" data-effect="kaleido">
+                <div class="effect-info">
+                  <div class="effect-name">Kaleido Type</div>
+                  <div class="effect-description">Kaleidoscope text patterns</div>
+                </div>
+              </div>
+
+              <div class="effect-option" data-effect="extruded3d">
+                <div class="effect-info">
+                  <div class="effect-name">3D Extruded Type</div>
+                  <div class="effect-description">Three-dimensional text extrusion</div>
+                </div>
+              </div>
+
+              <div class="effect-option" data-effect="pathType3d">
+                <div class="effect-info">
+                  <div class="effect-name">Path Type 3D</div>
+                  <div class="effect-description">3D text along curved paths</div>
+                </div>
+              </div>
+
+              <div class="effect-option" data-effect="technical">
+                <div class="effect-info">
+                  <div class="effect-name">Technical Type</div>
+                  <div class="effect-description">Technical typography with guides</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Image Effects Content -->
+        <div id="imageEffectsContent" class="panel-content-section" style="display: none;">
+          <div class="control-section">
+            <div class="section-title">Image Effects</div>
+            <div class="control-row">
+              <div id="imageEffectSelectHost" class="custom-select-host"></div>
+            </div>
+            <div id="imageEffectsList" class="effects-list"></div>
+            
+          </div>
+        </div>
+
+        <!-- Image Settings Content -->
+        <div id="imageSettingsContent" class="panel-content-section" style="display: none;">
+          <!-- Image Upload Section -->
+          <div class="control-section">
+            <div class="section-header">
+              <span class="section-title">Images</span>
+            </div>
+            <div class="image-upload-group">
+              <div class="control-with-icon">
+                <div class="icon-label">
+                  <img src="icons/icon-actions/CloudUpload.svg" alt="Upload" />
+                </div>
+                <div class="image-upload-container">
+                  <input type="file" id="panelImageUpload" accept="image/*" multiple class="image-upload-input" />
+                  <label for="panelImageUpload" class="image-upload-label">
+                    <span class="upload-text">Upload Images</span>
+                    <span class="upload-hint">JPG, PNG, GIF, WEBP</span>
+                  </label>
+                </div>
+              </div>
+            </div>
+            <div class="control-row">
+              <label class="control-label" for="panelImageLayeringSelect">Layering</label>
+              <select id="panelImageLayeringSelect" class="effect-select">
+                <option value="behind">Behind Text</option>
+                <option value="infront">Above Text</option>
+              </select>
+            </div>
+            <div class="content-group" style="margin-top: 8px;">
+              <div id="imageThumbList" class="image-thumb-list"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Dynamic Effect Settings Content -->
+        <div id="effectSettingsContent" class="panel-content-section" style="display: none;">
+          <!-- Content will be dynamically populated based on selected effect -->
+          <div id="dynamicEffectControls">
+            <!-- Controls will be generated here -->
+          </div>
+        </div>
+      </div>
+    </div>
+  </body>
+</html> 
